@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubehelm
+  namespace: perf-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubehelm
+  template:
+    metadata:
+      labels:
+        app: kubehelm
+    spec:
+      containers:
+      - name: kubehelm
+        image: centosadmin/kubernetes-helm:v3.12.3
+        volumeMounts:
+        - name: helm-home
+          mountPath: /var/helm-home
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1024Mi
+          limits:
+            cpu: 512m
+            memory: 1248Mi
+        args: ["sh", "-c", "while true; do sleep 1; done"]
+      volumes:
+      - name: helm-home
+        persistentVolumeClaim:
+          claimName: helm-pvc
