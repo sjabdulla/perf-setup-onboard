@@ -35,7 +35,9 @@ pipeline {
                     sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_SLAVE} --timeout=90s"
 
                     echo 'Getting IPs of the created PODS'
-                    env.POD_IPS = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE} -o jsonpath='{.items[*].status.podIP}' | tr ' ' ','", returnStdout: true).trim()
+                    script {
+                        env.POD_IPS = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE} -o jsonpath='{.items[*].status.podIP}' | tr ' ' ','", returnStdout: true).trim()
+                    }
 
                     echo "JMeter Slave Pod IPs : ${env.POD_IPS}"
                 }
@@ -47,22 +49,24 @@ pipeline {
                 container('kubehelm') {
                     echo '=====================Start of copying JMeter Script and Data Files into Pods====================='
 
-                    env.MASTER_POD_NAME = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_MASTER}")
-                    for (pod in ${ env.MASTER_POD_NAME }.split()) {
-                        echo "Copying JMeter Script Files to Master Pod: ${pod}"
-                        sh "kubectl cp ./scripts/ ${pod}:./"
+                    script {
+                        env.MASTER_POD_NAME = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_MASTER}")
+                        for (pod in ${ env.MASTER_POD_NAME }.split()) {
+                            echo "Copying JMeter Script Files to Master Pod: ${pod}"
+                            sh "kubectl cp ./scripts/ ${pod}:./"
 
-                        echo "Copying JMeter Data Files to Master Pod: $pod"
-                        sh "kubectl cp ./data/ ${pod}:./"
-                    }
+                            echo "Copying JMeter Data Files to Master Pod: $pod"
+                            sh "kubectl cp ./data/ ${pod}:./"
+                        }
 
-                    env.SLAVE_POD_NAMES = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE}")
-                    for (pod in ${ env.SLAVE_POD_NAMES }.split()) {
-                        echo "Copying JMeter Script Files to Slave Pod: ${pod}"
-                        sh "kubectl cp ./scripts/ ${pod}:./"
+                        env.SLAVE_POD_NAMES = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE}")
+                        for (pod in ${ env.SLAVE_POD_NAMES }.split()) {
+                            echo "Copying JMeter Script Files to Slave Pod: ${pod}"
+                            sh "kubectl cp ./scripts/ ${pod}:./"
 
-                        echo "Copying JMeter Data Files to Slave Pod: $pod"
-                        sh "kubectl cp ./data/ ${pod}:./"
+                            echo "Copying JMeter Data Files to Slave Pod: $pod"
+                            sh "kubectl cp ./data/ ${pod}:./"
+                        }
                     }
 
                     echo '=====================End of copying JMeter Script and Data Files into Pods====================='
