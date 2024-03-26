@@ -50,22 +50,22 @@ pipeline {
                     echo "=====================Start of copying JMeter Script and Data Files into Pods====================="
                     
                     env.MASTER_POD_NAME = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_MASTER}")
-                    for pod in ${env.MASTER_POD_NAME}; do
+                    for (pod in ${env.MASTER_POD_NAME}.split()) {
                         echo 'Copying JMeter Script Files to Master Pod: ${pod}'
                         sh "kubectl cp ./scripts/ ${pod}:./"
 
                         echo 'Copying JMeter Data Files to Master Pod: $pod'
                         sh "kubectl cp ./data/ ${pod}:./"
-                    done
+                    }
 
                     env.SLAVE_POD_NAMES = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE}")
-                    for pod in ${env.SLAVE_POD_NAMES}; do
+                    for (pod in ${env.SLAVE_POD_NAMES}.split()){
                         echo 'Copying JMeter Script Files to Master Pod: ${pod}'
                         sh "kubectl cp ./scripts/ ${pod}:./"
 
                         echo 'Copying JMeter Data Files to Master Pod: $pod'
                         sh "kubectl cp ./data/ ${pod}:./"
-                    done
+                    }
 
                     echo "=====================End of copying JMeter Script and Data Files into Pods====================="
                 }
