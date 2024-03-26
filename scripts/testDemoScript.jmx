@@ -36,7 +36,7 @@
           </elementProp>
           <elementProp name="holdLoadTime" elementType="Argument">
             <stringProp name="Argument.name">holdLoadTime</stringProp>
-            <stringProp name="Argument.value">${__P(holdLoadTime, 296)}</stringProp>
+            <stringProp name="Argument.value">${__P(holdLoadTime, 116)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="shutdownTime" elementType="Argument">
