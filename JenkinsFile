@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'kube/helm.yaml'
+            yamlFile 'kube/kubehelm-deployment.yaml'
         }
     }
 
