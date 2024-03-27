@@ -2,6 +2,8 @@ pipeline {
     agent{
         kubernetes {
             yamlFile './kube/kubehelm-pod.yaml'
+            namespace 'perf-platform'
+            label 'app: kubehelm'
         }
     }
 
@@ -14,7 +16,7 @@ pipeline {
             steps{
                 container ('kubehelm') {
                     sh 'echo =========================================================== Start deploying JMeter [Slave] Pods ==========================================================='
-                    sh 'mvn -version'
+                    sh 'helm repo update'
                 }
             }
         }
