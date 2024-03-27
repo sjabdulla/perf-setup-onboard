@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'kube/kubehelm-pod.yaml'
+            yamlFile './kube/kubehelm-pod.yaml'
         }
     }
 
@@ -19,67 +19,27 @@ pipeline {
         stage('Create JMeter Clusters') {
             steps {
                 container('kubehelm') {
-                    sh 'echo Updating Helm Repo'
+                    sh 'echo "Updating Helm Repo"'
                     sh 'helm repo update'
 
-                    sh 'echo Creating JMeter Master Cluster'
+                    sh 'echo "Creating JMeter Master Cluster"'
                     sh "helm install ${APP_JMETER_MASTER} perf-setup-helm/7.0-jmeter-master --values kube/jmeter-master.values --set appName=${APP_JMETER_MASTER}"
 
-                    sh 'echo Wait until JMeter Pod is getting created'
+                    sh 'echo "Wait until JMeter Pod is getting created"'
                     sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_MASTER} --timeout=90s"
 
-                    sh 'echo Creating JMeter Slave Clusters'
+                    sh 'echo "Creating JMeter Slave Clusters"'
                     sh "helm install ${APP_JMETER_SLAVE} perf-setup-helm/8.0-jmeter-slave --values kube/jmeter-slave.values --set appName=${APP_JMETER_SLAVE} --set replicas=${params.slaveCount}"
 
-                    sh "echo Wait until Slave Pods are getting created, # of Slave Pods : ${params.slaveCount}"
+                    sh 'echo "Wait until Slave Pods are getting created, # of Slave Pods : ${params.slaveCount}"'
                     sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_SLAVE} --timeout=90s"
 
-                    sh 'echo Getting IPs of the created PODS'
+                    sh 'echo "Getting IPs of the created PODS"'
                     script {
                         env.POD_IPS = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE} -o jsonpath='{.items[*].status.podIP}' | tr ' ' ','", returnStdout: true).trim()
                     }
 
-                    sh "echo JMeter Slave Pod IPs : ${env.POD_IPS}"
-                }
-            }
-        }
-
-        stage('Copying JMeter Script and Data Files') {
-            steps {
-                container('kubehelm') {
-                    sh 'echo =====================Start of copying JMeter Script and Data Files into Pods====================='
-
-                    script {
-                        env.MASTER_POD_NAME = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_MASTER}")
-                        for (pod in ${ env.MASTER_POD_NAME }.split()) {
-                            sh "echo Copying JMeter Script Files to Master Pod: ${pod}"
-                            sh "kubectl cp ./scripts/ ${pod}:./"
-
-                            sh "echo Copying JMeter Data Files to Master Pod: $pod"
-                            sh "kubectl cp ./data/ ${pod}:./"
-                        }
-
-                        env.SLAVE_POD_NAMES = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE}")
-                        for (pod in ${ env.SLAVE_POD_NAMES }.split()) {
-                            sh "echo Copying JMeter Script Files to Slave Pod: ${pod}"
-                            sh "kubectl cp ./scripts/ ${pod}:./"
-
-                            sh "Copying JMeter Data Files to Slave Pod: $pod"
-                            sh "kubectl cp ./data/ ${pod}:./"
-                        }
-                    }
-
-                    sh 'echo =====================End of copying JMeter Script and Data Files into Pods====================='
-                }
-            }
-        }
-
-        stage('Starting JMeter Test') {
-            steps {
-                container("${APP_JMETER_MASTER}") {
-                    sh 'echo =====================Start of executing JMeter Distributed Testing====================='
-
-                    sh 'echo =====================End of executing JMeter Distributed Testing====================='
+                    sh 'echo "JMeter Slave Pod IPs : ${env.POD_IPS}"'
                 }
             }
         }
