@@ -2,8 +2,6 @@ pipeline {
     agent{
         kubernetes {
             yamlFile './kube/kubehelm-pod.yaml'
-            namespace 'perf-platform'
-            label 'app: kubehelm'
         }
     }
 
