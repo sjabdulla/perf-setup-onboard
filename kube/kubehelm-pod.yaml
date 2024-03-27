@@ -18,9 +18,9 @@ spec:
       - cat
       tty: true
       volumeMounts:
-        - name: data-volume
-          mountPath: "mnt/data/helm"
+        - name: helm-volume
+          mountPath: "/mnt/data/.helm"
   volumes:
-    - name: data-volume
+    - name: helm-volume
       persistentVolumeClaim:
         claimName: helm-pvc
