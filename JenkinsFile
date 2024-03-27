@@ -1,31 +1,25 @@
 pipeline {
-    agent {
+    agent{
         kubernetes {
             yamlFile './kube/kubehelm-pod.yaml'
         }
     }
 
     environment {
-        DEPLOYMENT_NAME = "${JOB_NAME}-${BUILD_NUMBER}"
-        APP_JMETER_MASTER = "jmeter-master-${DEPLOYMENT_NAME}"
-        APP_JMETER_SLAVE = "jmeter-slave-${DEPLOYMENT_NAME}"
+        JOBNAME = "jmeter-perf"
     }
 
     parameters {
-        string(defaultValue: '2', description: 'JMeter Slave Count', name: 'slaveCount')
+        //Project onboarding - Set JMeter Parameters
     }
 
     stages {
-        stage('Create JMeter Clusters') {
-            steps {
-                container('kubehelm') {
-                    script {
-                        // Update Helm Repo
-                        sh 'echo "Updating Helm Repo"'
-                        sh 'helm repo update'
-                    }
+        stage ('Deploy JMeter Slave Slaves') {
+            steps{
+                container ('kubehelm') {
+                    sh 'echo =========================================================== Start deploying JMeter [Slave] Pods ==========================================================='
+                    sh 'helm repo update'
                 }
             }
         }
-    }
 }
