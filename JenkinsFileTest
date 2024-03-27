@@ -1,29 +1,7 @@
 pipeline {
     agent{
         kubernetes {
-            yaml '''
-                apiVersion: v1
-                kind: Pod
-                metadata:
-                  name: kubehelm
-                  namespace: perf-platform
-                spec:
-                  replicas: 1
-                  selector:
-                    matchLabels:
-                      app: kubehelm
-                  template:
-                    metadata:
-                      labels:
-                        app: kubehelm
-                    spec:
-                      containers:
-                      - name: maven
-                        image: maven:alpine
-                        command:
-                        - cat
-                        tty: true
-            '''
+            yamlFile './kube/kubehelm-pod.yaml'
         }
     }
 
