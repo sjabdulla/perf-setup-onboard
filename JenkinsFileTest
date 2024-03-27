@@ -1,7 +1,7 @@
 pipeline {
     agent{
         kubernetes {
-            yamlFile './kube/kubehelm-pod.yaml'
+            yamlFile './kubehelm-pod.yaml'
         }
     }
 
