@@ -9,10 +9,6 @@ pipeline {
         JOBNAME = "jmeter-perf"
     }
 
-    parameters {
-        //Project onboarding - Set JMeter Parameters
-    }
-
     stages {
         stage ('Deploy JMeter Slave Slaves') {
             steps{
