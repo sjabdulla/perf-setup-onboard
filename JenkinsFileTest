@@ -18,23 +18,11 @@ pipeline {
                         app: kubehelm
                     spec:
                       containers:
-                      - name: kubehelm
-                        image: centosadmin/kubernetes-helm:v3.12.3
-                        volumeMounts:
-                        - name: helm-home
-                          mountPath: /var/helm-home
-                        resources:
-                          requests:
-                            cpu: 200m
-                            memory: 1024Mi
-                          limits:
-                            cpu: 512m
-                            memory: 1248Mi
-                        args: ["sh", "-c", "while true; do sleep 1; done"]
-                      volumes:
-                      - name: helm-home
-                        persistentVolumeClaim:
-                          claimName: helm-pvc
+                      - name: maven
+                        image: maven:alpine
+                        command:
+                        - cat
+                        tty: true
             '''
         }
     }
@@ -48,7 +36,7 @@ pipeline {
             steps{
                 container ('kubehelm') {
                     sh 'echo =========================================================== Start deploying JMeter [Slave] Pods ==========================================================='
-                    sh 'helm repo update'
+                    sh 'mvn -version'
                 }
             }
         }
