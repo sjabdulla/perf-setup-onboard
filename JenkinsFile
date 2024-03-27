@@ -23,29 +23,6 @@ pipeline {
                         // Update Helm Repo
                         sh 'echo "Updating Helm Repo"'
                         sh 'helm repo update'
-
-                        // Create JMeter Master Cluster
-                        sh "echo 'Creating JMeter Master Cluster'"
-                        sh "helm install ${APP_JMETER_MASTER} perf-setup-helm/7.0-jmeter-master --values kube/jmeter-master.values --set appName=${APP_JMETER_MASTER}"
-
-                        // Wait until JMeter Pod is getting created
-                        sh 'echo "Wait until JMeter Pod is getting created"'
-                        sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_MASTER} --timeout=90s"
-
-                        // Create JMeter Slave Clusters
-                        sh 'echo "Creating JMeter Slave Clusters"'
-                        sh "helm install ${APP_JMETER_SLAVE} perf-setup-helm/8.0-jmeter-slave --values kube/jmeter-slave.values --set appName=${APP_JMETER_SLAVE} --set replicas=${params.slaveCount}"
-
-                        // Wait until Slave Pods are getting created
-                        sh "echo 'Wait until Slave Pods are getting created, # of Slave Pods: ${params.slaveCount}'"
-                        sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_SLAVE} --timeout=90s"
-
-                        // Getting IPs of the created PODS
-                        sh 'echo "Getting IPs of the created PODS"'
-                        env.POD_IPS = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE} -o jsonpath='{.items[*].status.podIP}' | tr '\\n' ','", returnStdout: true).trim()
-
-                        // Print JMeter Slave Pod IPs
-                        sh "echo 'JMeter Slave Pod IPs: ${env.POD_IPS}'"
                     }
                 }
             }
