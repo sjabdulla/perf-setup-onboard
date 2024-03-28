@@ -19,7 +19,7 @@ spec:
       tty: true
       volumeMounts:
         - name: helm-volume
-          mountPath: "/root/.helm"
+          mountPath: "/root/.config"
   volumes:
     - name: helm-volume
       persistentVolumeClaim:
