@@ -6,15 +6,40 @@ pipeline {
     }
 
     environment {
-        JOBNAME = "jmeter-perf"
+        DEPLOYMENT_NAME = "${JOB_NAME}-${BUILD_NUMBER}"
+        APP_JMETER_MASTER = "jmeter-master-${DEPLOYMENT_NAME}"
+        APP_JMETER_SLAVE = "jmeter-slave-${DEPLOYMENT_NAME}"
+    }
+
+    parameters {
+        string(defaultValue: '2', description: 'JMeter Slave Count', name: 'slaveCount')
     }
 
     stages {
-        stage ('Deploy JMeter Slave Slaves') {
+        stage ('Create JMeter Pods') {
             steps{
                 container ('kubehelm') {
-                    sh 'echo =========================================================== Start deploying JMeter [Slave] Pods ==========================================================='
-                    sh 'helm repo update'
+                    sh "echo ================================ Updating Helm Repo ================================"
+                    sh "helm repo update"
+
+                    sh "echo ================================ Start deploying JMeter [Master] Pod ================================"
+                    sh "helm install ${APP_JMETER_MASTER} perf-setup-helm/7.0-jmeter-master --values kube/jmeter-master.values --set appName=${APP_JMETER_MASTER}"
+
+                    sh "echo ================================ Wait until JMeter Master Pod is RUNNING ================================"
+                    sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_MASTER} --timeout=90s"
+
+                    sh "echo ================================ Creating JMeter Slave Clusters ================================"
+                    sh "helm install ${APP_JMETER_SLAVE} perf-setup-helm/8.0-jmeter-slave --values kube/jmeter-slave.values --set appName=${APP_JMETER_SLAVE} --set replicas=${params.slaveCount}"
+
+                    sh "echo ================================ Wait until Slave Pods are getting created, # of Slave Pods : ${params.slaveCount} ================================"
+                    sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_SLAVE} --timeout=90s"
+
+                    sh "echo ================================ Getting IPs of the created PODS ================================"
+                    script {
+                        env.POD_IPS = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE} -o jsonpath='{.items[*].status.podIP}' | tr ' ' ','", returnStdout: true).trim()
+                    }
+
+                    sh "echo ================================ JMeter Slave Pod IPs : ${env.POD_IPS} ================================"
                 }
             }
         }
