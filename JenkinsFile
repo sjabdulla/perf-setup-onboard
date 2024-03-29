@@ -27,14 +27,14 @@ pipeline {
 
         /* JMeter User Defined Variables, Keep the Body as EMPTY if no variables */
         JMETER_USER_DEFINED_VARIABLES =
-        "-Jprotocol=${params.protocol}" +
-        "-Jhost=${params.host}" +
-        "-JbasePath=${params.basePath}" +
-        "-JtestDataFile=${params.testDataFile}" +
-        "-JthreadCount=${params.threadCount}" +
-        "-JstartupTime=${params.startupTime}" +
-        "-JholdLoadTime=${params.holdLoadTime}" +
-        "-JshutdownTime=${params.shutdownTime}" +
+        "-Jprotocol=${params.protocol} " +
+        "-Jhost=${params.host} " +
+        "-JbasePath=${params.basePath} " +
+        "-JtestDataFile=${params.testDataFile} " +
+        "-JthreadCount=${params.threadCount} " +
+        "-JstartupTime=${params.startupTime} " +
+        "-JholdLoadTime=${params.holdLoadTime} " +
+        "-JshutdownTime=${params.shutdownTime} " +
         "-JtargetThroughputPerMin=${params.targetThroughputPerMin}"
     }
 
@@ -105,7 +105,7 @@ pipeline {
                         echo "==================== Starting JMeter Distributed Testing ===================="
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
 
-                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l ./jmeter-results.csv -e -o ./ ${JMETER_USER_DEFINED_VARIABLES} -R ${env.POD_IPS}"
+                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l ./jmeter-results.csv -e -o ./ -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c '${JMETER_COMMAND}'"
 
                         echo "==================== JMeter Distribution Test Execution is COMPLETED ===================="
