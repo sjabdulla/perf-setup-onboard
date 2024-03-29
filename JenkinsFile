@@ -51,6 +51,8 @@ pipeline {
                         echo "==================== Copying JMeter Script and Data Files into Pods ===================="
 
                         env.MASTER_POD_NAME = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_MASTER} -o jsonpath='{.items[*].metadata.name}'", returnStdout: true).trim()
+                        echo "JMeter Master POD Names : ${env.MASTER_POD_NAME}"
+
                         for (pod in env.MASTER_POD_NAME.split()) {
                             echo "Copying JMeter Script Files to Master Pod: ${pod}"
                             sh "kubectl cp ./scripts/ ${pod}:./"
@@ -59,6 +61,8 @@ pipeline {
                         }
 
                         env.SLAVE_POD_NAMES = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE} -o jsonpath='{.items[*].metadata.name}'", returnStdout: true).trim()
+                        echo "JMeter Slave POD Names : ${env.SLAVE_POD_NAMES}"
+
                         for (pod in env.SLAVE_POD_NAMES.split()) {
                             echo "Copying JMeter Script Files to Slave Pod: ${pod}"
                             sh "kubectl cp ./scripts/ ${pod}:./"
@@ -70,7 +74,18 @@ pipeline {
                 }
             }
         }
-    }
+
+        stage ('Execute JMeter Distributed Test') {
+            steps {
+                container ("${APP_JMETER_MASTER}") {
+                    script {
+                        echo "==================== Starting JMeter Distributed Testing ===================="
+                        sh "jmeter --version"
+                        echo "==================== Finished copying JMeter Script and Data Files into Pods ===================="
+                    }
+                }
+            }
+        }
 
     post {
         always {
