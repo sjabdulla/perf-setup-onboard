@@ -17,7 +17,7 @@ pipeline {
         string(defaultValue: '2', description: 'Startup Time', name: 'startupTime')
         string(defaultValue: '116', description: 'Hold Load Time', name: 'holdLoadTime')
         string(defaultValue: '2', description: 'Shutdown Time', name: 'shutdownTime')
-        string(defaultValue: '100', description: 'Target Throughput Per Min', name: 'targetThroughputPerMin')
+        string(defaultValue: '20', description: 'Target Throughput Per Min', name: 'targetThroughputPerMin')
     }
 
     environment {
@@ -119,12 +119,16 @@ pipeline {
 
     post {
         success {
-            script {
-                echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} ===================="
-                sh "kubectl cp ${env.MASTER_POD_NAME} :./${APP_TEST_RESULTS_DIRECTORY} ./"
-                echo "==================== Setting up JMeter JTL Results Report ===================="
-                perfReport "./${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv"
-                echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
+            container('kubehelm') {
+                script {
+                    echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} ===================="
+                    sh "kubectl cp ${env.MASTER_POD_NAME} :./${APP_TEST_RESULTS_DIRECTORY} ./ -n perf-platform"
+                    echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} is COMPLETED ===================="
+
+                    echo "==================== Setting up JMeter JTL Results Report ===================="
+                    perfReport "./${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv"
+                    echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
+                }
             }
         }
 
