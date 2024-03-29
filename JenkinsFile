@@ -44,13 +44,13 @@ pipeline {
             }
         }
 
-        /* stage ('Copying Data Files into JMeter Pods') {
+        stage ('Copying Data Files into JMeter Pods') {
             steps {
                 container ('kubehelm') {
                     script {
                         echo "==================== Copying JMeter Script and Data Files into Pods ===================="
 
-                        env.MASTER_POD_NAME = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_MASTER}", returnStdout: true).trim()
+                        env.MASTER_POD_NAME = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_MASTER} -o jsonpath='{.items[*].metadata.name}", returnStdout: true).trim()
                         for (pod in env.MASTER_POD_NAME.split()) {
                             echo "Copying JMeter Script Files to Master Pod: ${pod}"
                             sh "kubectl cp ./scripts/ ${pod}:./"
@@ -58,7 +58,7 @@ pipeline {
                             sh "kubectl cp ./data/ ${pod}:./"
                         }
 
-                        env.SLAVE_POD_NAMES = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE}", returnStdout: true).trim()
+                        env.SLAVE_POD_NAMES = sh(script: "kubectl get pods -n perf-platform -l app=${APP_JMETER_SLAVE} -o jsonpath='{.items[*].metadata.name}", returnStdout: true).trim()
                         for (pod in env.SLAVE_POD_NAMES.split()) {
                             echo "Copying JMeter Script Files to Slave Pod: ${pod}"
                             sh "kubectl cp ./scripts/ ${pod}:./"
@@ -69,10 +69,10 @@ pipeline {
                     echo "==================== Finished copying JMeter Script and Data Files into Pods ===================="
                 }
             }
-        } */
+        }
     }
 
-    /* post {
+    post {
         always {
             container('kubehelm') {
                 script {
@@ -84,5 +84,5 @@ pipeline {
                 }
             }
         }
-    } */
+    }
 }
