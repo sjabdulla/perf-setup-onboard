@@ -107,7 +107,7 @@ pipeline {
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'mkdir ${APP_TEST_RESULTS_DIRECTORY}'"
 
-                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -Dserver.rmi.localport=1099 -Dserver_port=1099 -Jserver.rmi.ssl.disable=true -l ${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv -e -o ${APP_TEST_RESULTS_DIRECTORY} -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
+                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -Dserver.rmi.localport=1099 -Dserver_port=1099 -Jserver.rmi.ssl.disable=true -l ./${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv -e -o ./${APP_TEST_RESULTS_DIRECTORY} -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c '${JMETER_COMMAND}'"
 
                         echo "==================== JMeter Distribution Test Execution is COMPLETED ===================="
@@ -120,8 +120,10 @@ pipeline {
     post {
         success {
             script {
+                echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} ===================="
+                sh "kubectl cp ${env.MASTER_POD_NAME} :./${APP_TEST_RESULTS_DIRECTORY} ./"
                 echo "==================== Setting up JMeter JTL Results Report ===================="
-                perfReport "${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv"
+                perfReport "./${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv"
                 echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
             }
         }
