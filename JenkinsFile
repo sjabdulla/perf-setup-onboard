@@ -121,7 +121,7 @@ pipeline {
                 container ('kubehelm') {
                     script {
                         echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} ===================="
-                        sh "kubectl cp ${env.MASTER_POD_NAME} :${APP_TEST_RESULTS_DIRECTORY} ${APP_TEST_RESULTS_DIRECTORY} -n perf-platform"
+                        sh "kubectl cp ${env.MASTER_POD_NAME}:${APP_TEST_RESULTS_DIRECTORY} ./${APP_TEST_RESULTS_DIRECTORY} -n perf-platform"
                         echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} is COMPLETED ===================="
 
                         echo "==================== Setting up JMeter JTL Results Report ===================="
