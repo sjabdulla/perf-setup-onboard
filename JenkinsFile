@@ -6,7 +6,7 @@ pipeline {
     }
 
     parameters {
-        string(defaultValue: '2', description: 'JMeter Slave Count', name: 'slaveCount')
+        string(defaultValue: '1', description: 'JMeter Slave Count', name: 'slaveCount')
         string(defaultValue: 'testDemoScript.jmx', description: 'JMeter Script Name (Default Directory is ./scripts)', name: 'scriptName')
 
         string(defaultValue: 'https', description: 'Protocol', name: 'protocol')
