@@ -26,17 +26,16 @@ pipeline {
         APP_JMETER_SLAVE = "jmeter-slave-${DEPLOYMENT_NAME}"
 
         /* JMeter User Defined Variables, Keep the Body as EMPTY if no variables */
-        JMETER_USER_DEFINED_VARIABLES = " \
-            -Jprotocol=${params.protocol} \
-            -Jhost=${params.host} \
-            -JbasePath=${params.basePath} \
-            -JtestDataFile=${params.testDataFile} \
-            -JthreadCount=${params.threadCount} \
-            -JstartupTime=${params.startupTime} \
-            -JholdLoadTime=${params.holdLoadTime} \
-            -JshutdownTime=${params.shutdownTime} \
-            -JtargetThroughputPerMin=${params.targetThroughputPerMin} \
-        "
+        JMETER_USER_DEFINED_VARIABLES =
+        "-Jprotocol=${params.protocol}" +
+        "-Jhost=${params.host}" +
+        "-JbasePath=${params.basePath}" +
+        "-JtestDataFile=${params.testDataFile}" +
+        "-JthreadCount=${params.threadCount}" +
+        "-JstartupTime=${params.startupTime}" +
+        "-JholdLoadTime=${params.holdLoadTime}" +
+        "-JshutdownTime=${params.shutdownTime}" +
+        "-JtargetThroughputPerMin=${params.targetThroughputPerMin}"
     }
 
     stages {
