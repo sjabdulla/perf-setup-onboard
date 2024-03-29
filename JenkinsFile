@@ -104,8 +104,9 @@ pipeline {
                     script {
                         echo "==================== Starting JMeter Distributed Testing ===================="
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
+                        sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'mkdir test-results'"
 
-                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l ./jmeter-results.csv -e -o ./ -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
+                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l /testResults/jmeter-results.csv -e -o /testResults -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c '${JMETER_COMMAND}'"
 
                         echo "==================== JMeter Distribution Test Execution is COMPLETED ===================="
@@ -119,7 +120,7 @@ pipeline {
         success {
             script {
                 echo "==================== Setting up JMeter JTL Results Report ===================="
-                perfReport "./jmeter-results.csv"
+                perfReport "/testResults/jmeter-results.csv"
                 echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
             }
         }
