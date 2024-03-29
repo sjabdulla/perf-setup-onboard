@@ -120,6 +120,7 @@ pipeline {
         success {
             echo "==================== Setting up JMeter JTL Results Report ===================="
             perfReport "./jmeter-results.csv"
+            echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
         }
         always {
             container('kubehelm') {
