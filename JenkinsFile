@@ -115,23 +115,25 @@ pipeline {
                 }
             }
         }
-    }
 
-    post {
-        success {
-            container('kubehelm') {
-                script {
-                    echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} ===================="
-                    sh "kubectl cp ${env.MASTER_POD_NAME} :./${APP_TEST_RESULTS_DIRECTORY} ./ -n perf-platform"
-                    echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} is COMPLETED ===================="
+        stage ('Copy JMeter Test Execution Results') {
+            steps {
+                container ('kubehelm') {
+                    script {
+                        echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} ===================="
+                        sh "kubectl cp ${env.MASTER_POD_NAME} :./${APP_TEST_RESULTS_DIRECTORY} ./ -n perf-platform"
+                        echo "==================== Copying JMeter Results File from Directory: ${APP_TEST_RESULTS_DIRECTORY} is COMPLETED ===================="
 
-                    echo "==================== Setting up JMeter JTL Results Report ===================="
-                    perfReport "./${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv"
-                    echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
+                        echo "==================== Setting up JMeter JTL Results Report ===================="
+                        perfReport "./${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv"
+                        echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
+                    }
                 }
             }
         }
+    }
 
+    post {
         always {
             container('kubehelm') {
                 script {
