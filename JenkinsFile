@@ -24,6 +24,7 @@ pipeline {
         DEPLOYMENT_NAME = "${JOB_NAME}-${BUILD_NUMBER}"
         APP_JMETER_MASTER = "jmeter-master-${DEPLOYMENT_NAME}"
         APP_JMETER_SLAVE = "jmeter-slave-${DEPLOYMENT_NAME}"
+        APP_TEST_RESULTS_DIRECTORY = "jmeter-results"
 
         /* JMeter User Defined Variables, Keep the Body as EMPTY if no variables */
         JMETER_USER_DEFINED_VARIABLES =
@@ -104,9 +105,9 @@ pipeline {
                     script {
                         echo "==================== Starting JMeter Distributed Testing ===================="
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
-                        sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'mkdir test-results'"
+                        sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'mkdir ${APP_TEST_RESULTS_DIRECTORY}'"
 
-                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l /testResults/jmeter-results.csv -e -o /testResults -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
+                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -Dserver.rmi.localport=1099 -Dserver_port=1099 -Jserver.rmi.ssl.disable=true -l ${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv -e -o ${APP_TEST_RESULTS_DIRECTORY} -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c '${JMETER_COMMAND}'"
 
                         echo "==================== JMeter Distribution Test Execution is COMPLETED ===================="
@@ -120,7 +121,7 @@ pipeline {
         success {
             script {
                 echo "==================== Setting up JMeter JTL Results Report ===================="
-                perfReport "/testResults/jmeter-results.csv"
+                perfReport "${APP_TEST_RESULTS_DIRECTORY}/jmeter-results.csv"
                 echo "==================== Setting up JMeter JTL Results Report is COMPLETED ===================="
             }
         }
