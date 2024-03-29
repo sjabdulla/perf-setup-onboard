@@ -44,7 +44,7 @@ pipeline {
             }
         }
 
-        stage ('Copying Data Files into JMeter Pods') {
+        /* stage ('Copying Data Files into JMeter Pods') {
             steps {
                 container ('kubehelm') {
                     script {
@@ -69,10 +69,10 @@ pipeline {
                     echo "==================== Finished copying JMeter Script and Data Files into Pods ===================="
                 }
             }
-        }
+        } */
     }
 
-    post {
+    /* post {
         always {
             container('kubehelm') {
                 script {
@@ -84,5 +84,5 @@ pipeline {
                 }
             }
         }
-    }
+    } */
 }
