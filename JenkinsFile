@@ -5,14 +5,38 @@ pipeline {
         }
     }
 
+    parameters {
+        string(defaultValue: '2', description: 'JMeter Slave Count', name: 'slaveCount')
+        string(defaultValue: 'testDemoScript.jmx', description: 'JMeter Script Name', name: 'scriptName')
+
+        string(defaultValue: 'https', description: 'Protocol', name: 'protocol')
+        string(defaultValue: 'catfact.ninja', description: 'Host', name: 'host')
+        string(defaultValue: '/breeds', description: 'Base Path', name: 'basePath')
+        string(defaultValue: 'testData.csv', description: 'Test Data File', name: 'testDataFile')
+        string(defaultValue: '10', description: 'Thread / User Count', name: 'threadCount')
+        string(defaultValue: '2', description: 'Startup Time', name: 'startupTime')
+        string(defaultValue: '116', description: 'Hold Load Time', name: 'holdLoadTime')
+        string(defaultValue: '2', description: 'Shutdown Time', name: 'shutdownTime')
+        string(defaultValue: '100', description: 'Target Throughput Per Min', name: 'targetThroughputPerMin')
+    }
+
     environment {
         DEPLOYMENT_NAME = "${JOB_NAME}-${BUILD_NUMBER}"
         APP_JMETER_MASTER = "jmeter-master-${DEPLOYMENT_NAME}"
         APP_JMETER_SLAVE = "jmeter-slave-${DEPLOYMENT_NAME}"
-    }
 
-    parameters {
-        string(defaultValue: '2', description: 'JMeter Slave Count', name: 'slaveCount')
+        /* JMeter User Defined Variables, Keep the Body as EMPTY if no variables */
+        JMETER_USER_DEFINED_VARIABLES = """
+            -Jprotocol=${params.protocol}
+            -Jhost=${params.host}
+            -JbasePath=${params.basePath}
+            -JtestDataFile=${params.testDataFile}
+            -JthreadCount=${params.threadCount}
+            -JstartupTime=${params.startupTime}
+            -JholdLoadTime=${params.holdLoadTime}
+            -JshutdownTime=${params.shutdownTime}
+            -JtargetThroughputPerMin=${params.targetThroughputPerMin}
+        """
     }
 
     stages {
@@ -81,7 +105,11 @@ pipeline {
                     script {
                         echo "==================== Starting JMeter Distributed Testing ===================="
                         sh "kubectl exec -it ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
-                        echo "==================== Finished copying JMeter Script and Data Files into Pods ===================="
+
+                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l ./jmeter-results.csv ${JMETER_USER_DEFINED_VARIABLES} -R ${env.POD_IPS}"
+                        sh "kubectl exec -it ${env.MASTER_POD_NAME} -- /bin/bash -c '"${JMETER_COMMAND}"'"
+
+                        echo "==================== JMeter Distribution Test Execution is COMPLETED ===================="
                     }
                 }
             }
@@ -89,6 +117,10 @@ pipeline {
     }
 
     post {
+        success {
+            echo "==================== Setting up JMeter JTL Results Report ===================="
+            perfReport "./jmeter-results.csv"
+        }
         always {
             container('kubehelm') {
                 script {
