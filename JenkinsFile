@@ -108,7 +108,7 @@ pipeline {
                         sh "kubectl exec -it ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
 
                         def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l ${JMETER_RESULTS_PATH}/jmeter-results.csv -e -o ${JMETER_RESULTS_PATH}/report -R ${env.POD_IPS} ${JMETER_USER_DEFINED_VARIABLES}"
-                        sh "kubectl exec -it ${env.MASTER_POD_NAME} -- /bin/bash -c '"${JMETER_COMMAND}"'"
+                        sh "kubectl exec -it ${env.MASTER_POD_NAME} -- /bin/bash -c '\"${JMETER_COMMAND}\"'"
 
                         echo "==================== JMeter Distribution Test Execution is COMPLETED ===================="
                     }
