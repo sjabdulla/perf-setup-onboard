@@ -133,7 +133,7 @@ pipeline {
         }
     }
 
-    post {
+    /* post {
         always {
             container('kubehelm') {
                 script {
@@ -145,5 +145,5 @@ pipeline {
                 }
             }
         }
-    }
+    } */
 }
