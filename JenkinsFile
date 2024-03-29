@@ -77,7 +77,7 @@ pipeline {
 
         stage ('Execute JMeter Distributed Test') {
             steps {
-                container ("${APP_JMETER_MASTER}") {
+                container ("${env.MASTER_POD_NAME}") {
                     script {
                         echo "==================== Starting JMeter Distributed Testing ===================="
                         sh "jmeter --version"
