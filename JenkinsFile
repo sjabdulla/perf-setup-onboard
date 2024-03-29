@@ -24,20 +24,19 @@ pipeline {
         DEPLOYMENT_NAME = "${JOB_NAME}-${BUILD_NUMBER}"
         APP_JMETER_MASTER = "jmeter-master-${DEPLOYMENT_NAME}"
         APP_JMETER_SLAVE = "jmeter-slave-${DEPLOYMENT_NAME}"
-        JMETER_RESULTS_PATH = "./results"
 
         /* JMeter User Defined Variables, Keep the Body as EMPTY if no variables */
-        JMETER_USER_DEFINED_VARIABLES = """
-            -Jprotocol=${params.protocol}
-            -Jhost=${params.host}
-            -JbasePath=${params.basePath}
-            -JtestDataFile=${params.testDataFile}
-            -JthreadCount=${params.threadCount}
-            -JstartupTime=${params.startupTime}
-            -JholdLoadTime=${params.holdLoadTime}
-            -JshutdownTime=${params.shutdownTime}
-            -JtargetThroughputPerMin=${params.targetThroughputPerMin}
-        """
+        JMETER_USER_DEFINED_VARIABLES = " \
+            -Jprotocol=${params.protocol} \
+            -Jhost=${params.host} \
+            -JbasePath=${params.basePath} \
+            -JtestDataFile=${params.testDataFile} \
+            -JthreadCount=${params.threadCount} \
+            -JstartupTime=${params.startupTime} \
+            -JholdLoadTime=${params.holdLoadTime} \
+            -JshutdownTime=${params.shutdownTime} \
+            -JtargetThroughputPerMin=${params.targetThroughputPerMin} \
+        "
     }
 
     stages {
@@ -107,7 +106,7 @@ pipeline {
                         echo "==================== Starting JMeter Distributed Testing ===================="
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
 
-                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l ${JMETER_RESULTS_PATH}/jmeter-results.csv -e -o ${JMETER_RESULTS_PATH}/report ${JMETER_USER_DEFINED_VARIABLES} -R ${env.POD_IPS}"
+                        def JMETER_COMMAND = "jmeter -n -t ./scripts/${params.scriptName} -l ./jmeter-results.csv -e -o ./ ${JMETER_USER_DEFINED_VARIABLES} -R ${env.POD_IPS}"
                         sh "kubectl exec ${env.MASTER_POD_NAME} -- /bin/bash -c '${JMETER_COMMAND}'"
 
                         echo "==================== JMeter Distribution Test Execution is COMPLETED ===================="
