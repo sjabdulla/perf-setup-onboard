@@ -53,7 +53,7 @@ pipeline {
                         echo "==================== Waiting for JMeter Master Pod to be RUNNING ===================="
                         sh "kubectl wait --for=condition=Ready pod -n perf-platform -l app=${APP_JMETER_MASTER} --timeout=90s"
 
-                        echo "==================== Creating JMeter Slave Clusters ===================="
+                        echo "==================== Creating JMeter [Slave] Pod(s) ===================="
                         sh "helm install ${APP_JMETER_SLAVE} perf-setup-helm/8.0-jmeter-slave --values kube/jmeter-slave.values --set appName=${APP_JMETER_SLAVE} --set replicas=${params.slaveCount}"
 
                         echo "==================== Waiting for Slave Pods to be created, # of Slave Pods: ${params.slaveCount} ===================="
@@ -137,6 +137,10 @@ pipeline {
         always {
             container('kubehelm') {
                 script {
+                    echo "==================== Archiving all the resources ===================="
+                    sh "pwd"
+                    archiveArtifacts artifacts: '**/*', excludes: ''
+
                     echo "==================== Deleting JMeter Master Pod ===================="
                     sh "helm uninstall ${APP_JMETER_MASTER}"
 
