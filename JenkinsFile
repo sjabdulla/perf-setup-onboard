@@ -77,10 +77,10 @@ pipeline {
 
         stage ('Execute JMeter Distributed Test') {
             steps {
-                container ("${env.MASTER_POD_NAME}") {
+                container ('kubehelm') {
                     script {
                         echo "==================== Starting JMeter Distributed Testing ===================="
-                        sh "jmeter --version"
+                        sh "kubectl exec -it ${env.MASTER_POD_NAME} -- /bin/bash -c 'jmeter --version'"
                         echo "==================== Finished copying JMeter Script and Data Files into Pods ===================="
                     }
                 }
