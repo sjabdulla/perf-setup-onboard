@@ -2,7 +2,7 @@ replicas: 1
 
 appName: jmeter-master
 
-image: jmeter/jmeter-master-5.6.3:1.0
+image: sjay8691/jmeter-master-5.6.3:1.0
 
 resources:
   requests:
